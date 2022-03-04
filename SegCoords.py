@@ -12,6 +12,8 @@
 # In[2]:
 
 
+import random
+
 # Generate segment lengths to be exactly the mean length given
 def SimpleLengthGenerator(mean_len):
     return mean_len
@@ -100,6 +102,49 @@ def GetSequencesFromGenome(coord_list, fasta_file_path):
             res.append((needed_chr_str[entry[0]])[entry[1] : entry[2]])
     return res
             
+# Add deletion
+def AddDeletion(dna_str, deletion_frac, deletion_mean, deletion_l_generator):
+    del_rand = random.random()
+    if (del_rand > deletion_frac):
+        return dna_str, ""
+    del_l = round(deletion_l_generator(deletion_mean))
+    if (del_l >= len(dna_str)):
+        return "", "-(0," + str(len(dna_str)) + ")"
+    if (del_l < 1):
+        del_l = 1
+    del_start = random.randint(0, len(dna_str) - del_l)
+    res = dna_str[0 : del_start] + dna_str[del_start + del_l : ]
+    return res, "-(" + str(del_start) + "," + str(del_start + del_l) + ")"
+
+# Add duplication
+def AddDuplication(dna_str, dup_frac, dup_mean, dup_l_generator):
+    dup_rand = random.random()
+    if (dup_rand > dup_frac):
+        return dna_str, ""
+    dup_l = round(dup_l_generator(dup_mean))
+    if (dup_l >= len(dna_str)):
+        return dna_str + dna_str, "+(0," + str(len(dna_str)) + ")"
+    if (dup_l < 1):
+        dup_l = 1
+    dup_start = random.randint(dup_l, len(dna_str))
+    res = dna_str[0 : dup_start] + dna_str[dup_start - dup_l : dup_start] + dna_str[dup_start : ]
+    return res, "+(" + str(dup_start - dup_l) + "," + str(dup_start) + ")"
+
+# Add SV: deletion and duplication
+def AddSVtoStr(dna_str, deletion_frac, deletion_mean, deletion_l_generator, dup_frac, dup_mean, dup_l_generator, p_del_prev_dup):
+    order_rand = random.random()
+    info_str = ""
+    if (order_rand <= p_del_prev_dup):
+        new_str, curr_info = AddDeletion(dna_str, deletion_frac, deletion_mean, deletion_l_generator)
+        info_str += curr_info
+        new_str, curr_info = AddDuplication(new_str, dup_frac, dup_mean, dup_l_generator)
+        info_str += curr_info
+    else:
+        new_str, curr_info = AddDuplication(dna_str, dup_frac, dup_mean, dup_l_generator)
+        info_str += curr_info
+        new_str, curr_info = AddDeletion(new_str, deletion_frac, deletion_mean, deletion_l_generator)
+        info_str += curr_info
+    return new_str, info_str
 
 
 # In[ ]:
