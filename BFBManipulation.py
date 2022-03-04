@@ -23,8 +23,8 @@ def BFBOneCycle(input_str, right):
 def CountBFBSegments(input_str):
     segments = set()
     item = 0
-    while abs(input_str[item]) not in segments:
-        segments.add(input_str[item])
+    while item < len(input_str):
+        segments.add(abs(input_str[item]))
         item += 1      
     counts = [0]*(len(segments)+1)
     for char in input_str:
