@@ -1,15 +1,21 @@
 
 import random
 
-
 ## Select a break point, duplicate, reverse and append
-def BFBOneCycle(input_str):
+def BFBOneCycle(input_str, right):
     breakpoint = random.randint(1, len(input_str)-1)
-    duplicate = input_str[breakpoint:len(input_str)]
+    print(breakpoint)
+    if right:
+        duplicate = input_str[breakpoint:len(input_str)]
+    else:
+        duplicate = input_str[0: breakpoint]
     append = []
     for char in range(len(duplicate)-1, -1, -1):
         append.append(-1*duplicate[char])
-    modified_str = input_str + append
+    if right:
+        modified_str = input_str + append
+    else:
+        modified_str = append + input_str
     return modified_str
 
 
