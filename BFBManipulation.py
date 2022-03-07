@@ -33,14 +33,14 @@ def CountBFBSegments(input_str):
 
 ## Main function to simulate BFB cycles given a string of segments and number of cycles 
 ## returns total count vector after simulating all cycles
-def PartOneWrapper(n_segments, n_cycles):
+def PartOneWrapper(n_segments, n_cycles, right):
     count_array = []
     start_string = []
     for seg in range(1, n_segments+1):
         start_string.append(seg)
     i = 0
     while i < n_cycles:
-        new_string = BFBOneCycle(start_string)
+        new_string = BFBOneCycle(start_string, right)
         counts = CountBFBSegments(new_string)
         count_array.append(counts)
         start_string = new_string
