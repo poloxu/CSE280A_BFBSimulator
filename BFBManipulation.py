@@ -45,7 +45,7 @@ def PartOneWrapper(n_segments, n_cycles):
         count_array.append(counts)
         start_string = new_string
         i += 1
-    return count_array
+    return count_array, start_string
 
 
 
