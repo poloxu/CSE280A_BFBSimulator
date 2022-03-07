@@ -4,7 +4,7 @@ import random
 ## Select a break point, duplicate, reverse and append
 def BFBOneCycle(input_str, right):
     breakpoint = random.randint(1, len(input_str)-1)
-    print(breakpoint)
+    #print(breakpoint)
     if right:
         duplicate = input_str[breakpoint:len(input_str)]
     else:

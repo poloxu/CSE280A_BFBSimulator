@@ -6,7 +6,7 @@
 
 import argparse
 from SegCoords import SimpleLengthGenerator, ExponLengthGenerator, ReverseComplement, GenerateSegCoords, GetSequencesFromGenome, AddSVtoStr
-#from BFBManipulation import 
+from BFBManipulation import PartOneWrapper
 
 
 # In[5]:
@@ -69,13 +69,6 @@ print("Probability that deletion is simulated before duplication: " + str(p_del_
 print()
 
 
-# In[7]:
-
-
-sim_BFB_str = [1, 2, 3, 4, 5, -5, -4]
-sim_BFB_cnts = [-1, 1, 1, 1, 2, 2]
-
-
 # In[ ]:
 
 
@@ -89,6 +82,9 @@ generator = DetermineGenerator(seg_d)
 del_generator = DetermineGenerator(del_d)
 dup_generator = DetermineGenerator(dup_d)
 seg_coords = GenerateSegCoords(chr_str, mean_l, start_pos, end_pos, generator)
+
+seg_cnts, sim_BFB_str = PartOneWrapper(len(seg_coords) - 1, n_cycle, rev_flag)
+sim_BFB_cnts = seg_cnts[len(seg_cnts) - 1]
 
 # Output the BFB string
 output_BFBstr = output_pref + ".BFBAbsStr.tsv"
