@@ -86,7 +86,7 @@ def GetSequencesFromGenome(coord_list, fasta_file_path):
             if (curr_chrnum != None and curr_chrnum in needed_chr):
                 needed_chr_str[curr_chrnum] = curr_str
             curr_str = ""
-            curr_chrnum = line[1:]
+            curr_chrnum = line[4:]
         else:
             curr_str += line
     if (curr_chrnum != None and curr_chrnum in needed_chr):
