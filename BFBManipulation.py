@@ -4,7 +4,7 @@ import random
 ## Select a break point, duplicate, reverse and append
 def BFBOneCycle(input_str, right):
     breakpoint = random.randint(1, len(input_str)-1)
-    #print(breakpoint)
+    print(breakpoint)
     if right:
         duplicate = input_str[breakpoint:len(input_str)]
     else:
@@ -16,7 +16,7 @@ def BFBOneCycle(input_str, right):
         modified_str = input_str + append
     else:
         modified_str = append + input_str
-    return modified_str
+    return modified_str, breakpoint+len(duplicate)
 
 
 ## using indexing in an array
@@ -36,16 +36,18 @@ def CountBFBSegments(input_str):
 def PartOneWrapper(n_segments, n_cycles, right):
     count_array = []
     start_string = []
+    breakpoints = []
     for seg in range(1, n_segments+1):
         start_string.append(seg)
     i = 0
     while i < n_cycles:
-        new_string = BFBOneCycle(start_string, right)
+        new_string, breakpoint = BFBOneCycle(start_string, right)
+        breakpoints.append(breakpoint)
         counts = CountBFBSegments(new_string)
         count_array.append(counts)
         start_string = new_string
         i += 1
-    return count_array, start_string
+    return count_array, start_string, breakpoints
 
 
 

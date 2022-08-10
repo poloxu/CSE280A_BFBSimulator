@@ -5,6 +5,7 @@
 
 
 import argparse
+import random
 from SegCoords import SimpleLengthGenerator, ExponLengthGenerator, ReverseComplement, GenerateSegCoords, GetSequencesFromGenome, AddSVtoStr
 from BFBManipulation import PartOneWrapper
 
@@ -18,7 +19,7 @@ parser.add_argument("chr_str", help = "Name of the chromosome to simulate BFB on
 parser.add_argument("start_pos", type = int, help = "Start position of the genome section to simulate BFB on (0-indexed, inclusive)")
 parser.add_argument("end_pos", type = int, help = "End position of the genome section to simulate BFB on (0-indexed, exclusive)")
 parser.add_argument("genome", help = "FASTA file of the genome")
-parser.add_argument("-l", type = int, default = 400000, help = "Mean length of the BFB segments (default 400000)")
+parser.add_argument("-l", type = int, default = 600000, help = "Mean length of the BFB segments (default 600000)")
 parser.add_argument("-ld", default = "expo", choices = ["expo", "simple"],
                     help = "Distribution of the BFB segment lengths. \"expo\"(default): exponential; \"simple\": all use the same value as the mean length")
 parser.add_argument("-df", type = float, default = 0.1, help = "Probability for each BFB segment to have one deletion (default 0.1)")
@@ -32,6 +33,8 @@ parser.add_argument("-xd", default = "expo", choices = ["expo", "simple"],
 parser.add_argument("-o", default = "BFBSimulateOut", help = "Prefix of the output files")
 parser.add_argument("-rev", action = "store_false", default = True, help = "If this option is specified, BFB simulation will append string to the 5' side of the region")
 parser.add_argument("-p", type = float, default = 0.5, help = "For each segment, the probability that deletion is simulated before duplication (default 0.5)")
+parser.add_argument("-b", type = float, default = 0.1, help = "Probability that there is a deletion when appending duplicated segment. (default 0.1)")
+parser.add_argument("-bl", type = int, default = 50000, help = "Length of deletion when appending duplicated segment. (default 50000)")
 
 args = parser.parse_args()
 n_cycle = args.num_cycles
@@ -50,6 +53,8 @@ dup_d = args.xd
 output_pref = args.o
 rev_flag = args.rev
 p_del_prev_dup = args.p
+del_seg = args.b
+len_seg = args.bl
 
 print("Arguments passed in:")
 print("Number of BFB cycles: " + str(n_cycle))
@@ -66,6 +71,8 @@ print("BFB segment duplication length distribution: " + dup_d)
 print("Output files prefix: " + output_pref)
 print("Adding to 3' end of the specified region: " + str(rev_flag))
 print("Probability that deletion is simulated before duplication: " + str(p_del_prev_dup))
+print("Probability of a deletion when appending duplicated segment: " + str(del_seg))
+print("Length of deletion when appending duplicated segment: " + str(len_seg))
 print()
 
 
@@ -83,7 +90,19 @@ del_generator = DetermineGenerator(del_d)
 dup_generator = DetermineGenerator(dup_d)
 seg_coords = GenerateSegCoords(chr_str, mean_l, start_pos, end_pos, generator)
 
-seg_cnts, sim_BFB_str = PartOneWrapper(len(seg_coords) - 1, n_cycle, rev_flag)
+############################################
+for entry in seg_coords:
+    print(type(entry[0]))
+    print(type(entry[1]))
+    print(type(entry[2]))
+#############################################
+
+seg_cnts, sim_BFB_str, breakpoints = PartOneWrapper(len(seg_coords) - 1, n_cycle, rev_flag)
+
+################################
+print(breakpoints)
+################################
+
 sim_BFB_cnts = seg_cnts[len(seg_cnts) - 1]
 
 # Output the BFB string
@@ -117,6 +136,7 @@ final_str = ""
 seg_strs = GetSequencesFromGenome(seg_coords, genome_path)
 seg_strs_wrev = [[None, None]] # Structure: [[None, None], [seg1, reverse_comp_seg1], [seg2, reverse_comp_seg2], ...]
 seg_strs_SVinfo = [None]
+seg_strs_DELinfo = []
 print_str_flag = True
 for i in range(len(seg_strs)):
     if (i == 0):
@@ -129,11 +149,37 @@ for i in range(len(seg_strs)):
     seg_strs_wrev.append([curr_str, ReverseComplement(curr_str)])
     seg_strs_SVinfo.append(curr_info)
 if (print_str_flag):
-    for seg in sim_BFB_str:
+    for index in range (0, len(sim_BFB_str)):
+        seg = sim_BFB_str[index]
+        del_prob = random.random()
         if (seg > 0):
-            final_str += (seg_strs_wrev[seg][0])
+            if index in breakpoints and del_prob < del_seg:
+                seg_string = seg_strs_wrev[seg][0]
+                if len_seg > len(seg_string):
+                    final_str += ""
+                    seg_strs_DELinfo.append("-"+str(seg_string))
+                else:
+                    final_str += seg_string[len_seg:len(seg_string)]
+                    seg_strs_DELinfo.append("-" + str(seg_string[0:len_seg]))
+                    #final_str += seg_string[0:(len(seg_string)-len_seg)]
+                    #seg_strs_DELinfo.append("-" + str(seg_string[len(seg_string)-len_seg:len(seg_string)]))
+            else:
+                final_str += (seg_strs_wrev[seg][0])
+                seg_strs_DELinfo.append("")
         if (seg < 0):
-            final_str += (seg_strs_wrev[-seg][1])
+            if index in breakpoints and del_prob < del_seg:
+                seg_string = seg_strs_wrev[-seg][1]
+                if len_seg > len(seg_string):
+                    final_str += ""
+                    seg_strs_DELinfo.append("-"+str(seg_string))
+                else:
+                    final_str += seg_string[len_seg:len(seg_string)]
+                    seg_strs_DELinfo.append("-" + str(seg_string[0:len_seg]))
+                    #final_str += seg_string[0:(len(seg_string)-len_seg)]
+                    #seg_strs_DELinfo.append("-" + str(seg_string[len(seg_string)-len_seg:len(seg_string)]))
+            else:
+                final_str += (seg_strs_wrev[-seg][1])
+                seg_strs_DELinfo.append("")
     output_fa = output_pref + ".BFBFinalSeq.fa"
     out_f = open(output_fa, "w")
     out_f.write(">SimulatedBFB" + "\n")
@@ -159,3 +205,13 @@ for i in range(len(seg_coords)):
 print("Saved segment coordinates to: " + output_coords)
 out_c.close()
 
+
+# Output deleted info as a bed file
+# Format: Column1 is segment index (starting from 1) Column2 is Segment from Abstracted BFB string, and Column 3 is deleted string in the form of -actct
+
+output_deletions = output_pref + ".DELCoords.bed"
+out_d = open(output_deletions, "w")
+for i in range(0, len(seg_strs_DELinfo)):
+    out_d.write(str(i+1) + "\t" + str(sim_BFB_str[i]) + "\t" + str(seg_strs_DELinfo[i]) + "\n")
+print("Saved deletions to: " + output_deletions)
+out_d.close()
