@@ -1,20 +1,21 @@
-#### Documentation on BFB Simulations
+# Documentation on BFB Simulations
 
-### Parameters
-usage: BFBSimulator.py [-h] [-l L] [-ld {expo,simple}] [-df DF] [-dl DL]
-                       [-dd {expo,simple}] [-xf XF] [-xl XL]
-                       [-xd {expo,simple}] [-o O] [-rev] [-p P] [-b B]
-                       [-bl BL]
-                       num_cycles chr_str start_pos end_pos genome
+## Parameters
 
-positional arguments:
+<p>usage: BFBSimulator.py num_cycles chr_str start_pos end_pos genome<br>
+                       [-h] [-l L] [-ld {expo,simple}] [-df DF] [-dl DL]<br>
+                       [-dd {expo,simple}] [-xf XF] [-xl XL]<br>
+                       [-xd {expo,simple}] [-o O] [-rev] [-p P] <br>[-b B]<br>
+                       [-bl BL]</p>
+
+<p>positional arguments:
   num_cycles         Number of BFB cycles to simulate
   chr_str            Name of the chromosome to simulate BFB on
   start_pos          Start position of the genome section to simulate BFB on
                      (0-indexed, inclusive)
   end_pos            End position of the genome section to simulate BFB on
                      (0-indexed, exclusive)
-  genome             FASTA file of the genome
+  genome             FASTA file of the genome</p>
 
 optional arguments:
   -h, --help         show this help message and exit
